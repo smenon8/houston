@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=missing-docstring
+from unittest import mock
+
 import pretend
 import pytest
 
@@ -7,6 +9,7 @@ import app as target_module
 from app import (
     _ensure_storage,
     CONFIG_NAME_MAPPER,
+    configure_from_config_file,
     create_app,
 )
 
@@ -45,13 +48,19 @@ class TestEnsureStorage:
             assert path.exists()
 
 
-@pytest.fixture(autouse=True)
-def unset_FLASK_CONFIG(monkeypatch):
-    """Don't allow a globally set ``FLASK_CONFIG`` environ var
-    to influence the testing context
+class TestConfigureFromConfigFile:
+    """Tests configure_from_config_file"""
 
-    """
-    monkeypatch.delenv('FLASK_CONFIG', raising=False)
+    def test_without_flask_config_definition(self, monkeypatch):
+        """must defaults to 'local' without the flask config name"""
+        app = mock.MagicMock()
+        monkeypatch.delenv('FLASK_CONFIG', raising=False)
+
+        # Target
+        configure_from_config_file(app)
+
+        expected_args = ('local_config.LocalConfig',)
+        app.config.from_object.assert_called_with(*expected_args)
 
 
 def test_create_app():
