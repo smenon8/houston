@@ -233,10 +233,7 @@ def test_commit_bad_asset_group(flask_app_client, researcher_1, test_root, reque
 
     asset_group_sighting_guid = uuids['asset_group_sighting']
 
-    from IPython import embed
-
-    embed()
-
+    # I am not sure why this constitutes bad data
     bad_patch_data = [
         {
             'op': 'replace',
@@ -293,6 +290,8 @@ def test_commit_bad_asset_group(flask_app_client, researcher_1, test_root, reque
         flask_app_client, researcher_1, asset_group_sighting_guid, bad_patch_data, 200
     )
 
+    # should return a 400 (or 500?) error according to ticket,
+    # which would break this line in the test but it passes with 200 OK
     asset_group_utils.commit_asset_group_sighting(
         flask_app_client, researcher_1, asset_group_sighting_guid
     )
