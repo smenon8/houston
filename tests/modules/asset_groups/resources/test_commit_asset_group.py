@@ -220,3 +220,83 @@ def test_commit_individual_asset_group(
             asset_group_utils.delete_asset_group(
                 flask_app_client, researcher_1, asset_group_uuid
             )
+
+
+@pytest.mark.skipif(
+    module_unavailable('asset_groups'), reason='AssetGroups module disabled'
+)
+def test_commit_bad_asset_group(flask_app_client, researcher_1, test_root, request):
+
+    uuids = asset_group_utils.create_large_asset_group_uuids(
+        flask_app_client, researcher_1, request, test_root
+    )
+
+    asset_group_sighting_guid = uuids['asset_group_sighting']
+
+    from IPython import embed
+
+    embed()
+
+    bad_patch_data = [
+        {
+            'op': 'replace',
+            'path': '/idConfigs',
+            'value': [
+                {
+                    'algorithms': ['hotspotter_nosv'],
+                    'matching_set': {
+                        'bool': {
+                            'filter': [
+                                {
+                                    'bool': {
+                                        'minimum_should_match': 1,
+                                        'should': [
+                                            [
+                                                {
+                                                    'term': {
+                                                        'locationId': '565f4498-bcc0-4f2c-8147-8b18b2b77d90'
+                                                    }
+                                                },
+                                                {
+                                                    'term': {
+                                                        'locationId': '35244723-ee82-4d87-ab3d-6587e6acf2d0'
+                                                    }
+                                                },
+                                                {
+                                                    'term': {
+                                                        'locationId': '97512700-2ba5-4153-82d8-bd210db28c59'
+                                                    }
+                                                },
+                                                {
+                                                    'term': {
+                                                        'locationId': '3a6ebaab-b391-4b44-86c7-dad2c3e6f66b'
+                                                    }
+                                                },
+                                                {
+                                                    'term': {
+                                                        'locationId': '99616622-ed80-4e64-af80-17cbd79a94eb'
+                                                    }
+                                                },
+                                            ]
+                                        ],
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                }
+            ],
+        }
+    ]
+
+    asset_group_utils.patch_asset_group_sighting(
+        flask_app_client, researcher_1, asset_group_sighting_guid, bad_patch_data, 200
+    )
+
+    asset_group_utils.commit_asset_group_sighting(
+        flask_app_client, researcher_1, asset_group_sighting_guid
+    )
+
+    asset_group_utils.read_asset_group_sighting(
+        flask_app_client, researcher_1, asset_group_sighting_guid
+    )
