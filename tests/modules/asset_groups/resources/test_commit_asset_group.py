@@ -186,7 +186,7 @@ def test_commit_individual_asset_group(
         asset_group_sighting_guid = ags_data['guid']
         asset_group_sighting = AssetGroupSighting.query.get(asset_group_sighting_guid)
 
-        # Ensure we have the correct asset_group_sighting guid
+        # Ensure we havae the correct asset_group_sighting guid
         if 'individualUuid' not in str(asset_group_sighting.config):
             ags_data = asset_group_utils.extract_ags_data(resp.json, 1)
             asset_group_sighting_guid = ags_data['guid']
@@ -241,46 +241,7 @@ def test_commit_bad_asset_group(flask_app_client, researcher_1, test_root, reque
             'value': [
                 {
                     'algorithms': ['hotspotter_nosv'],
-                    'matching_set': {
-                        'bool': {
-                            'filter': [
-                                {
-                                    'bool': {
-                                        'minimum_should_match': 1,
-                                        'should': [
-                                            [
-                                                {
-                                                    'term': {
-                                                        'locationId': '565f4498-bcc0-4f2c-8147-8b18b2b77d90'
-                                                    }
-                                                },
-                                                {
-                                                    'term': {
-                                                        'locationId': '35244723-ee82-4d87-ab3d-6587e6acf2d0'
-                                                    }
-                                                },
-                                                {
-                                                    'term': {
-                                                        'locationId': '97512700-2ba5-4153-82d8-bd210db28c59'
-                                                    }
-                                                },
-                                                {
-                                                    'term': {
-                                                        'locationId': '3a6ebaab-b391-4b44-86c7-dad2c3e6f66b'
-                                                    }
-                                                },
-                                                {
-                                                    'term': {
-                                                        'locationId': '99616622-ed80-4e64-af80-17cbd79a94eb'
-                                                    }
-                                                },
-                                            ]
-                                        ],
-                                    }
-                                }
-                            ]
-                        }
-                    },
+                    'matching_set': 'A goose'
                 }
             ],
         }
@@ -289,12 +250,13 @@ def test_commit_bad_asset_group(flask_app_client, researcher_1, test_root, reque
     asset_group_utils.patch_asset_group_sighting(
         flask_app_client, researcher_1, asset_group_sighting_guid, bad_patch_data, 200
     )
-
     # should return a 400 (or 500?) error according to ticket,
     # which would break this line in the test but it passes with 200 OK
     asset_group_utils.commit_asset_group_sighting(
         flask_app_client, researcher_1, asset_group_sighting_guid
     )
+
+    print('done with commit')
 
     asset_group_utils.read_asset_group_sighting(
         flask_app_client, researcher_1, asset_group_sighting_guid
