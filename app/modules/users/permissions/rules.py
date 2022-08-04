@@ -46,7 +46,7 @@ MODULE_USER_MAP = {
     ('Individual', AccessOperation.DELETE): ['is_data_manager', 'is_admin'],
     ('Annotation', AccessOperation.READ): ['is_researcher'],
     ('Annotation', AccessOperation.WRITE): ['is_researcher'],
-    ('User', AccessOperation.READ): ['is_user_manager'],
+    ('User', AccessOperation.READ): ['is_active', 'is_user_manager'],
     ('User', AccessOperation.WRITE): ['is_active'],  # Creating yourself
     # Any user can request to collaborate with anyone
     ('Collaboration', AccessOperation.WRITE): ['is_active'],
@@ -391,6 +391,7 @@ class ObjectActionRule(DenyAbortMixin, Rule):
                 has_permission = self.elevated_permission() | (
                     self._permitted_via_collaboration()
                     | self._permitted_as_public_data()
+                    | self._permitted_as_assigned_user()
                     # | self._permitted_via_org()
                     # | self._permitted_via_project()
                 )
@@ -413,6 +414,12 @@ class ObjectActionRule(DenyAbortMixin, Rule):
                 or self._action == AccessOperation.WRITE
             )
         )
+
+    @module_required('missions', resolve='warn', default=False)
+    def _permitted_as_assigned_user(self):
+        from app.modules.missions.models import MissionTask
+
+        return isinstance(self._obj, MissionTask) and self._obj.user_is_assigned(self._user)
 
     # def _permitted_via_org(self):
     #     has_permission = False
